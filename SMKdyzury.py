@@ -1,6 +1,6 @@
 """
 SMK Rozkurwiator dyżurów
-@author: Samuel Mazur
+@author: Samuel Mazur & KH
 """
 
 import os

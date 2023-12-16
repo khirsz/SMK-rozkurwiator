@@ -1,6 +1,6 @@
 """
 SMK ROZKURWIATOR 0.7
-@author: Samuel Mazur
+@author: Samuel Mazur $ KH
 """
 
 import os
@@ -77,7 +77,7 @@ def obliczRokSzkolenia(rokSzkoleniaLubData, data):
 
     dataSzkolenia = parseDate(rokSzkoleniaLubData)
     dataProcedury = parseDate(data)
-    return str(relativedelta(dataProcedury, dataSzkolenia).years)
+    return str(relativedelta(dataProcedury, dataSzkolenia).years+1)
 
 class Konfiguracja:
     def __init__(self):
