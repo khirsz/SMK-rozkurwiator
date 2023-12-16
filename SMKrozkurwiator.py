@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 SMK ROZKURWIATOR 0.7
 @author: Samuel Mazur
@@ -6,6 +5,7 @@ SMK ROZKURWIATOR 0.7
 
 import os
 import sys
+from time import sleep
 import selenium.common.exceptions
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -16,6 +16,8 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import numpy as np
 import tkinter
+from dateutil.relativedelta import relativedelta
+from dateutil.parser import parse as parseDate
 
 def dzialanie(pacjenci, konfiguracja, driver):
     WBwait = WebDriverWait(driver, 50, poll_frequency=1)
@@ -36,7 +38,7 @@ def dzialanie(pacjenci, konfiguracja, driver):
         WBwait.until(EC.element_to_be_clickable((By.XPATH, "//tbody/tr[1]/td[2]/div[1]/input[1]"))).send_keys(pacjent.data)
         #rok szkolenia
         rokSzkolenia = Select(WBwait.until(EC.element_to_be_clickable((By.XPATH,"//tbody/tr[1]/td[4]/div[1]/select[1]"))))
-        rokSzkolenia.select_by_value(konfiguracja.rok)
+        rokSzkolenia.select_by_value(obliczRokSzkolenia(konfiguracja.rok, pacjent.data))
         #kod zabiegu
         kodZabiegu = Select(WBwait.until(EC.element_to_be_clickable((By.XPATH,"//tbody/tr[1]/td[5]/div[1]/select[1]"))))
         kodZabiegu.select_by_index(str(int(konfiguracja.kod)-1))
@@ -68,6 +70,15 @@ def dzialanie(pacjenci, konfiguracja, driver):
         #nazwaproc
         WBwait.until(EC.element_to_be_clickable((By.XPATH, "//tbody/tr[1]/td[12]/div[1]/input[1]"))).send_keys(pacjent.usluga)
 
+def obliczRokSzkolenia(rokSzkoleniaLubData, data):
+    if len(rokSzkoleniaLubData) <= 2:
+        #tekst to prawdopodobnie tylko rok
+        return rokSzkoleniaLubData
+
+    dataSzkolenia = parseDate(rokSzkoleniaLubData)
+    dataProcedury = parseDate(data)
+    return str(relativedelta(dataProcedury, dataSzkolenia).years)
+
 class Konfiguracja:
     def __init__(self):
         self.rok = None
@@ -87,7 +98,7 @@ class Okno(tkinter.Tk):
         self.grid()
         stepOne = tkinter.LabelFrame(self, text=" Wypełnij zgodnie z instrukcją ")
         stepOne.grid(row=0, columnspan=7, sticky='W',padx=5, pady=5, ipadx=5, ipady=5)
-        self.RokLbl = tkinter.Label(stepOne,text="Rok szkolenia")
+        self.RokLbl = tkinter.Label(stepOne, anchor="e", justify="right", text="Rok szkolenia\n(Lub data rozpoczecia w przypadku trybu automatcznego)")
         self.RokLbl.grid(row=0, column=0, sticky='E', padx=5, pady=2)
         self.RokTxt = tkinter.Entry(stepOne)
         self.RokTxt.grid(row=0, column=1, columnspan=3, pady=2, sticky='WE')
@@ -125,42 +136,42 @@ class Okno(tkinter.Tk):
         self.protocol("WM_DELETE_WINDOW", sys.exit)
 
     def wyslij(self):
-        self.konfiguracja.rok = self.RokTxt.get()
+        self.konfiguracja.rok = self.RokTxt.get().strip()
         if self.konfiguracja.rok == "":
             self.RokTxt.config({"background": "Red"})
             return
         else:
             self.RokTxt.config({"background": "White"})
 
-        self.konfiguracja.kod = self.KodTxt.get()
+        self.konfiguracja.kod = self.KodTxt.get().strip()
         if self.konfiguracja.kod == "":
             self.KodTxt.config({"background": "Red"})
             return
         else:
             self.KodTxt.config({"background": "White"})
 
-        self.konfiguracja.osoba = self.OsobaTxt.get()
+        self.konfiguracja.osoba = self.OsobaTxt.get().strip()
         if self.konfiguracja.osoba == "":
             self.OsobaTxt.config({"background": "Red"})
             return
         else:
             self.OsobaTxt.config({"background": "White"})
 
-        self.konfiguracja.miejsce = self.MiejsceTxt.get()
+        self.konfiguracja.miejsce = self.MiejsceTxt.get().strip()
         if self.konfiguracja.miejsce == "":
             self.MiejsceTxt.config({"background": "Red"})
             return
         else:
             self.MiejsceTxt.config({"background": "White"})
 
-        self.konfiguracja.nazwa = self.NazwaTxt.get()
+        self.konfiguracja.nazwa = self.NazwaTxt.get().strip()
         if self.konfiguracja.nazwa == "":
             self.NazwaTxt.config({"background": "Red"})
             return
         else:
             self.NazwaTxt.config({"background": "White"})
 
-        self.konfiguracja.lokalizacja = self.LokalizacjaTxt.get()
+        self.konfiguracja.lokalizacja = self.LokalizacjaTxt.get().strip()
         if self.konfiguracja.lokalizacja == "":
             self.LokalizacjaTxt.config({"background": "Red"})
             return
@@ -288,10 +299,12 @@ def main():
     while True:
         okno.mainloop()
         if okno.konfiguracja.lokalizacja is None:
+            sleep(1)
             continue
         pacjenci = zaladujPacjentow(okno.konfiguracja.lokalizacja)
-        dzialanie(pacjenci, okno.konfiguracja, driver)
-        okno.konfiguracja.lokalizacja = None
+        if pacjenci:
+            dzialanie(pacjenci, okno.konfiguracja, driver)
+            okno.konfiguracja.lokalizacja = None
 
 if __name__ == "__main__":
     main()
