@@ -110,7 +110,7 @@ def zaladujDyzury(lokalizacja):
         for kolumna in df.columns:
             nazwaUjednolicona = str(kolumna).strip().lower()
             if dataKol is None and "data" in nazwaUjednolicona:
-                dataKol = df[kolumna].dt.strftime("%Y-%m-%d")
+                dataKol = pd.to_datetime(df[kolumna], errors='coerce').dt.strftime("%Y-%m-%d")
             elif minutyKol is None and "minut" in nazwaUjednolicona:
                 minutyKol = df[kolumna]
             elif godzinyKol is None and "godzin" in nazwaUjednolicona:

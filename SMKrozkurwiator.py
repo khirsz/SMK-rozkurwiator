@@ -234,7 +234,7 @@ def zaladujPacjentow(lokalizacja):
         for kolumna in df.columns:
             nazwaUjednolicona = str(kolumna).strip().lower()
             if dataKol is None and "data" in nazwaUjednolicona:
-                dataKol = df[kolumna].dt.strftime("%Y-%m-%d")
+                dataKol = pd.to_datetime(df[kolumna], errors='coerce').dt.strftime("%Y-%m-%d")
             elif imieKol is None and "imi" in nazwaUjednolicona:
                 imieKol = df[kolumna]
             elif nazwiskoKol is None and "nazwisko" in nazwaUjednolicona:
