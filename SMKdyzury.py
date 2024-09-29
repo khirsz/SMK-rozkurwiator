@@ -28,16 +28,18 @@ def dzialanie(dyzury, driver):
         return
 
     for dyzur in dyzury:
+        if dyzur.data is np.nan:
+            continue
         #dodaj
         WBwait.until(EC.element_to_be_clickable(przyciskDodaj)).click()
         #godziny
-        WBwait.until(EC.element_to_be_clickable((By.XPATH, f"//tbody/tr[last()]/td[4]/div[1]/input[1]"))).send_keys(dyzur.godziny)
+        WBwait.until(EC.element_to_be_clickable((By.XPATH, f"//tbody/tr[last()]/td[4]/div[1]/input[@value='']"))).send_keys(dyzur.godziny)
         #minuty
-        WBwait.until(EC.element_to_be_clickable((By.XPATH, f"//tbody/tr[last()]/td[5]/div[1]/input[1]"))).send_keys(dyzur.minuty)
+        WBwait.until(EC.element_to_be_clickable((By.XPATH, f"//tbody/tr[last()]/td[5]/div[1]/input[@value='']"))).send_keys(dyzur.minuty)
         #data
-        WBwait.until(EC.element_to_be_clickable((By.XPATH, f"//tbody/tr[last()]/td[6]/div[1]/input[1]"))).send_keys(dyzur.data)
+        WBwait.until(EC.element_to_be_clickable((By.XPATH, f"//tbody/tr[last()]/td[6]/div[1]/input[@value='']"))).send_keys(dyzur.data)
         #Nazwa komórki organizacyjnej
-        WBwait.until(EC.element_to_be_clickable((By.XPATH, f"//tbody/tr[last()]/td[8]/div[1]/input[1]"))).send_keys(dyzur.nazwa)
+        WBwait.until(EC.element_to_be_clickable((By.XPATH, f"//tbody/tr[last()]/td[8]/div[1]/input[@value='']"))).send_keys(dyzur.nazwa)
 
 class Konfiguracja:
     def __init__(self):
@@ -123,14 +125,16 @@ def zaladujDyzury(lokalizacja):
             continue
 
         for i in range(df.shape[0]):
-            if godzinyKol is not None:
-                aktualneGodziny = str(godzinyKol[i])
-            else:
+            try:
+                aktualneGodziny = str(int(godzinyKol[i]))
+            except:
                 aktualneGodziny = "24"
-            if minutyKol is not None:
-                aktualneMinuty = str(minutyKol[i])
-            else:
+
+            try:
+                aktualneMinuty = str(int(minutyKol[i]))
+            except:
                 aktualneMinuty = ""
+
             #zaladowanie danych
             dyzury.append(Dyzur(dataKol[i], nazwaKol[i], aktualneGodziny, aktualneMinuty))
 
